@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Колесо Решений</title>
+    <style>
+        :root {
+            --primary-color: #6a11cb;
+            --secondary-color: #2575fc;
+            --text-color: #fff;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --button-color: #ff8a00;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px var(--shadow-color);
+        }
+        
+        .settings {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        input, textarea {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+        }
+        
+        @media (min-width: 768px) {
+            .wheel-container {
+                width: 350px;
+                height: 350px;
+            }
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 10px solid #333;
+            box-shadow: 0 0 25px var(--shadow-color);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            transform: rotate(0deg);
+        }
+        
+        .wheel-item {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            text-shadow: 1px 1px 2px #000;
+        }
+        
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            z-index: 10;
+        }
+        
+        .wheel-pointer:before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #ff4757;
+            filter: drop-shadow(0 0 5px var(--shadow-color));
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--button-color), #da1b60);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            font-size: 1.8rem;
+            margin: 20px 0;
+            min-height: 60px;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px var(--shadow-color);
+            animation: fadeIn 0.5s ease;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: transform 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.selected {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">Что сегодня сделать?</h1>
+        
+        <div class="settings">
+            <div class="input-group">
+                <label for="title-input">Заголовок колеса:</label>
+                <input type="text" id="title-input" value="Что сегодня сделать?">
+            </div>
+            
+            <div class="input-group">
+                <label for="prizes-input">Варианты (каждый с новой строки):</label>
+                <textarea id="prizes-input">уборку
+зарядку
+ничего</textarea>
+            </div>
+            
+            <div class="input-group">
+                <label>Цвет колеса:</label>
+                <div class="color-picker">
+                    <div class="color-option selected" style="background: #6a11cb;" data-color1="#6a11cb" data-color2="#2575fc"></div>
+                    <div class="color-option" style="background: #FF5252;" data-color1="#FF5252" data-color2="#FF4081"></div>
+                    <div class="color-option" style="background: #3F51B5;" data-color1="#3F51B5" data-color2="#2196F3"></div>
+                    <div class="color-option" style="background: #4CAF50;" data-color1="#4CAF50" data-color2="#8BC34A"></div>
+                    <div class="color-option" style="background: #FF9800;" data-color1="#FF9800" data-color2="#FFC107"></div>
+                </div>
+            </div>
+            
+            <button id="update-btn">Обновить колесо</button>
+        </div>
+        
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="wheel"></div>
+        </div>
+        
+        <button id="spin-btn">Крутить колесо!</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Элементы DOM
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spin-btn');
+        const result = document.getElementById('result');
+        const titleElement = document.getElementById('title');
+        const titleInput = document.getElementById('title-input');
+        const prizesInput = document.getElementById('prizes-input');
+        const updateBtn = document.getElementById('update-btn');
+        const colorOptions = document.querySelectorAll('.color-option');
+        
+        // Цвета секторов
+        const sectorColors = [
+            "#FF5252", "#FF4081", "#E040FB", "#7C4DFF",
+            "#536DFE", "#448AFF", "#40C4FF", "#18FFFF",
+            "#64FFDA", "#69F0AE", "#B2FF59", "#EEFF41",
+            "#FFFF00", "#FFD740", "#FFAB40", "#FF6E40"
+        ];
+        
+        // Текущие настройки
+        let currentColors = {
+            primary: '#6a11cb',
+            secondary: '#2575fc',
+            button: '#ff8a00'
+        };
+        
+        // Инициализация
+        function initWheel() {
+            updateTitle();
+            updateWheel();
+            setupEventListeners();
+        }
+        
+        // Обновление заголовка
+        function updateTitle() {
+            titleElement.textContent = titleInput.value || "Колесо Решений";
+        }
+        
+        // Обновление колеса
+        function updateWheel() {
+            // Получаем призы из текстового поля
+            const prizesText = prizesInput.value.trim();
+            const prizes = prizesText.split('\n').filter(item => item.trim() !== '');
+            
+            // Очищаем колесо
+            wheel.innerHTML = '';
+            result.textContent = '';
+            
+            if (prizes.length === 0) {
+                wheel.style.background = '#ccc';
+                return;
+            }
+            
+            const sectorAngle = 360 / prizes.length;
+            
+            // Создаем сектора
+            prizes.forEach((prize, index) => {
+                const sector = document.createElement('div');
+                sector.className = 'wheel-item';
+                sector.style.backgroundColor = sectorColors[index % sectorColors.length];
+                sector.style.transform = `rotate(${sectorAngle * index}deg) skewY(${90 - sectorAngle}deg)`;
+                
+                const text = document.createElement('div');
+                text.textContent = prize.trim();
+                text.style.transform = `skewY(${sectorAngle - 90}deg) rotate(${sectorAngle / 2}deg)`;
+                text.style.width = '50%';
+                text.style.textAlign = 'center';
+                text.style.fontSize = prizes.length > 6 ? '14px' : '16px';
+                
+                sector.appendChild(text);
+                wheel.appendChild(sector);
+            });
+        }
+        
+        // Вращение колеса
+        function spinWheel() {
+            const prizes = prizesInput.value.trim().split('\n').filter(item => item.trim() !== '');
+            if (prizes.length === 0) {
+                result.textContent = "Добавьте варианты в настройках!";
+                return;
+            }
+            
+            spinBtn.disabled = true;
+            updateBtn.disabled = true;
+            result.textContent = '';
+            
+            const spins = 3 + Math.floor(Math.random() * 7);
+            const sectorAngle = 360 / prizes.length;
+            const randomSector = Math.floor(Math.random() * prizes.length);
+            const targetAngle = spins * 360 + (360 - randomSector * sectorAngle);
+            
+            wheel.style.transform = `rotate(${targetAngle}deg)`;
+            
+            setTimeout(() => {
+                spinBtn.disabled = false;
+                updateBtn.disabled = false;
+                const prize = prizes[randomSector].trim();
+                result.textContent = `Результат: ${prize}`;
+                createConfetti();
+            }, 4000);
+        }
+        
+        // Эффект конфетти
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.opacity = '1';
+                document.body.appendChild(confetti);
+                
+                const animation = confetti.animate([
+                    { transform: `translateY(-20vh) rotate(0deg)`, opacity: 1 },
+                    { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: 2000 + Math.random() * 3000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+        
+        // Смена цветовой схемы
+        function changeColorScheme(color1, color2, buttonColor) {
+            currentColors = {
+                primary: color1,
+                secondary: color2,
+                button: buttonColor
+            };
+            
+            document.documentElement.style.setProperty('--primary-color', color1);
+            document.documentElement.style.setProperty('--secondary-color', color2);
+            document.documentElement.style.setProperty('--button-color', buttonColor);
+            
+            colorOptions.forEach(option => option.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            spinBtn.addEventListener('click', spinWheel);
+            updateBtn.addEventListener('click', () => {
+                updateTitle();
+                updateWheel();
+            });
+            
+            titleInput.addEventListener('input', updateTitle);
+            
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const color1 = this.getAttribute('data-color1');
+                    const color2 = this.getAttribute('data-color2');
+                    const buttonColor = this.getAttribute('data-button') || '#ff8a00';
+                    changeColorScheme(color1, color2, buttonColor);
+                });
+            });
+        }
+        
+        // Запуск приложения
+        initWheel();
+    </script>
+</body>
+</html>
